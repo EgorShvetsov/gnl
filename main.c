@@ -1,15 +1,18 @@
 #include "get_next_line.h"
 #include <stdio.h>
 
-int		main(void)
+int		main(int ac, char **av)
 {
 	int fd;
-	int b;
 	char *line;
 
-	fd = open("file_to_read", O_RDONLY);
-	b = get_next_line(fd, &line);
+	(void)ac;
+	fd = open(av[1], O_RDONLY);
+	while (get_next_line(fd, &line))
+		printf("%s", line);
 
-	printf("%s\n", line);
+	//if (result == -1)
+	//printf("Оно поломалось!!!\n");else
+
 	return (0);
 }

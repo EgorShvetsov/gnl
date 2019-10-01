@@ -12,59 +12,51 @@
 
 #include "get_next_line.h"
 #include "Libft/libft.h"
-#include <stdio.h>
 
-int 	is_n(char *str)
+static void		ftail(char *buf, char *tail)
 {
-	int i;
+	char *tmp;
 
-	i = 0;
-	while (str[i] != '\n' && str[i] != '\0')
-		i++;
-	if (str[i] == '\n')
-	{
-		printf("\\n detected! i = %d\n", i);
-		return (i);
-	}
-	else
-		return (0);
+	ft_bzero(tail, BUFF_SIZE + 1);
+	tmp = ft_strchr(buf, '\n');
+	ft_strcpy(tail, tmp);
+	*tmp = '\0';
 }
 
-int		get_next_line(const int fd, char **line)
+static void		join(char **line, char *buf)
 {
-	char		buf[BUFF_SIZE + 1];
-	static char tail[BUFF_SIZE + 1];
-	char 		head[BUFF_SIZE + 1];
-	char 		*str;
-	int			ret;
+	char *copy;
 
-	if (!line || fd < 0)
+	copy = *line;
+	*line = ft_strjoin(copy, buf);
+	free(copy);
+}
+
+int				get_next_line(const int fd, char **line)
+{
+	char			buf[BUFF_SIZE + 1];
+	int				ret;
+	static char		tail[BUFF_SIZE + 1];
+
+	if (fd < 0)
 		return (-1);
-	str = malloc(1);
+	if (!*line)
+		*line = malloc(sizeof(*line));
+	else
+	{
+		free(*line);
+		*line = ft_strdup(tail);
+	}
 	while ((ret = read(fd, buf, BUFF_SIZE)))
 	{
-
 		buf[ret] = '\0';
-		printf("str is: %s\n", str);
-		printf("buf is: %s\n", buf);
-		printf("%d\n", is_n(buf));
-		if (!(is_n(buf)))
-			str = ft_strjoin(str, buf);
-		else if (is_n(buf))
+		if (ft_strchr(buf, '\n'))
 		{
-			ft_strcpy(tail, &buf[is_n(buf)]);
-			printf("tail is %s\n", tail);
-			ft_strncpy(head, buf, is_n(buf));
-			str = ft_strjoin(str, head);
-			*line = str;
+			ftail(buf, tail);
+			join(line, buf);
 			return (1);
 		}
-		printf("***************************************************************************\n");
-		printf("buf is: %s\n", buf);
-		printf("===========================================================================\n");
-		printf("str is: %s\n", str);
-		printf("***************************************************************************\n");
+		join(line, buf);
 	}
-	*line = str;
 	return (0);
 }
